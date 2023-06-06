@@ -121,7 +121,7 @@ VERSION="$INPUT"
 
 # Enter path to your source icon file
 read -r -d '' origicon_input <<'EOF'
-   set dialogText to text returned of (display dialog "Path to the icon png file. (Drag'n Drop is supported)" default answer "" buttons {"Cancel","Continue"} default button 2)
+   set dialogText to text returned of (display dialog "Path to the icon png file. (Drag'n Drop is supported).\rTo skip the icon, just click Continue" default answer "Skip" buttons {"Cancel","Continue"} default button 2)
    return dialogText
 EOF
 INPUT=$(osascript -e "$origicon_input");
