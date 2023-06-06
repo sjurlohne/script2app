@@ -37,7 +37,7 @@
 # Once the above steps are complete, we need to do some preparations before signing,
 # notarizing and stapling.
 #
-# 1. Check for, and delete, hidden files like .DSStore in the YOURAPP.app bundle
+# 1. Check for, and delete, hidden files like .DS_Store in the YOURAPP.app bundle
 # 2. Remove all attributes for files and folders using this command:
 #    'xattr -cr YOURAPP.app'
 #
