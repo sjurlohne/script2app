@@ -55,6 +55,7 @@
 # 1. Run this command, and make a note of the 'WWDRTeamID', aka Team ID.
 #    'xcrun altool --list-providers -u "YOUR_APPLE_ID"'
 # 2. Run this command, and choose any Profile name you like, and use your App Password.
+#    (To create an App Password, log on to appleid.apple.com)
 #    'xcrun notarytool store-credentials --apple-id "YOUR_APPLE_ID" --password "YOUR_APP_PASSWORD" --team-id "THE_ID_FROM_STEP_1"'
 # 3. You have to zip the app before submitting for notarizzation.
 # 4. Now you can notarize the zip file, using this command:
