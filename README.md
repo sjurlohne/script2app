@@ -7,3 +7,5 @@ The source uses osascript to ask for user input, so editing the script variables
 
 After the script has finished, you're left with an app in your $HOME. You don't need to do anything else, but if you plan to use the app on other
 computers you want to sign, notarize and staple it, before distribution.
+
+Is this useful in any way? Perhaps not, but I learned stuff while making it...and that's useful to me :)
