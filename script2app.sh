@@ -85,7 +85,7 @@ LOG "========== LOG BEGIN =========="
 
 UserCancelCheck() {
    if [[ -z $INPUT ]]; then
-      echo "User clicked cancel"
+      LOG "User clicked cancel"
       exit 0
    fi
 }
@@ -258,5 +258,7 @@ If you choose pkg or dmg, you need to sign and notarize the package as well.
 " with title "Optional next steps" buttons {"OK"}
 EOF
 INPUT=$(osascript -e "$finish");
+
+LOG "========== LOG END =========="
 
 exit 0
