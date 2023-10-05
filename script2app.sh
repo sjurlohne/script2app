@@ -74,6 +74,15 @@
 # If you choose pkg or dmg, you need to sign and notarize the package as well.
 #
 
+# Logging
+label="script2app"
+
+function LOG() {
+    echo "$(date '+%Y-%M-%d %H:%M:%S') [$label] $1" >> $HOME/Library/Logs/$label.log
+}
+
+LOG "========== LOG BEGIN =========="
+
 UserCancelCheck() {
    if [[ -z $INPUT ]]; then
       echo "User clicked cancel"
@@ -90,7 +99,7 @@ osascript -e 'display dialog "This app will ask for user input, so editing the s
 
 # Exit the script if user clicks cancel here.
 if [[ $(echo $?) == 1 ]]; then
-	echo "User clicked cancel"
+	LOG "User clicked cancel"
 	exit 0
 fi
 
@@ -172,6 +181,9 @@ iconutil --convert icns $ICONDIR -o $APP/Contents/Resources/$PROJECT.icns
 # Delete the iconset, we don't need it anymore
 if [[ -f $HOME/$PROJECT.app/Contents/Resources/$PROJECT.icns ]]; then
     rm -rf $ICONDIR
+else
+   LOG "Failed to create icons"
+   exit 1
 fi
 
 #######################
@@ -203,7 +215,7 @@ chmod +x $APP/Contents/MacOS/$PROJECT
 
 ## Delete any .DS_Store files before notarizing.
 if [[ $(ls -a | egrep '^\.D') ]]; then
-   echo "Found DS_Store file"
+   LOG "Found DS_Store file, deleting..."
    rm $(ls -a | egrep '^\.D')
 fi
 
