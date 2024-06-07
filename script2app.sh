@@ -3,6 +3,7 @@
 ############################
 ## Created by: Sjur Lohne ##
 ## Date: 23-05-2023       ##
+## Update: 07-07-2024     ##
 ##                        ########################################################
 ## A cheat sheet for how to quickly create a simple app that executes a script. ##
 ## You can also add an icon to the app, so it looks nice.                       ##
@@ -77,11 +78,19 @@
 # Logging
 label="script2app"
 
-function LOG() {
-    echo "$(date '+%Y-%M-%d %H:%M:%S') [$label] $1" >> $HOME/Library/Logs/$label.log
+log_location="$HOME/Library/Logs/$label.log"
+LOG(){
+    timestamp=
+    if [[ "$(whoami)" == "root" ]]; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') [$label] : $1" | tee -a $log_location
+    else
+        echo "$(date '+%Y-%m-%d %H:%M:%S') [$label] : $1" | tee -a $log_location
+    fi
 }
 
 LOG "========== LOG BEGIN =========="
+
+# Functions
 
 UserCancelCheck() {
    if [[ -z $INPUT ]]; then
@@ -90,11 +99,11 @@ UserCancelCheck() {
    fi
 }
 
-##############################
-##### Populate Variables #####
-##############################
+##############################################
+##### Populate Variables with user input #####
+##############################################
 
-# Let the user know about the prerequisites.
+##### Let the user know about the prerequisites.
 osascript -e 'display dialog "This app will ask for user input, so editing the script variables manually should not be needed.\rAfter the script has finished, you are left with an app in your $HOME folder.\r\rYou dont need to do anything else, but if you plan to use the app on other computers, you want to sign, notarize and staple it, before distribution.\r\rYou will need the following:\r\r• A script you want the app to run\r• An icon PNG file" with title "Prerequisites" buttons {"Cancel","Continue"} default button 2'
 
 # Exit the script if user clicks cancel here.
@@ -104,7 +113,7 @@ if [[ $(echo $?) == 1 ]]; then
 fi
 
 # So far so good, let continue.
-# Give the project a name. This will become the name of your app.
+##### MARK: NAME - Give the project a name. This will become the name of your app.
 read -r -d '' project_input <<'EOF'
    set dialogText to text returned of (display dialog "Please enter the name of your App" default answer "" buttons {"Cancel","Continue"} default button 2)
    return dialogText
@@ -116,7 +125,7 @@ UserCancelCheck
 # Populate a unique variable with the data from $INPUT
 PROJECT="$INPUT"
 
-# Optional: You can give your app a version number
+##### MARK: VERSION - Give your app a version number
 read -r -d '' version_input <<'EOF'
    set dialogText to text returned of (display dialog "Please enter the version of your App" default answer "1.0" buttons {"Cancel","Continue"} default button 2)
    return dialogText
@@ -128,9 +137,21 @@ UserCancelCheck
 # Populate a unique variable with the data from $INPUT
 VERSION="$INPUT"
 
-# Enter path to your source icon file
+##### MARK: BUNDLEID - Give your app a bundle ID number
+read -r -d '' bundle_input <<'EOF'
+   set dialogText to text returned of (display dialog "Please enter the bundle prefix of your App" default answer "com.examle." buttons {"Cancel","Continue"} default button 2)
+   return dialogText
+EOF
+INPUT=$(osascript -e "$bundle_input");
+
+# Exit the script if user clicks cancel here.
+UserCancelCheck
+# Populate a unique variable with the data from $INPUT
+BUNDLEID="$INPUT$PROJECT"
+
+##### MARK: ICON - Enter path to your source icon file
 read -r -d '' origicon_input <<'EOF'
-   set dialogText to text returned of (display dialog "Path to the icon png file. (Drag'n Drop is supported).\rTo skip the icon, just click Continue" default answer "Skip" buttons {"Cancel","Continue"} default button 2)
+   set dialogText to text returned of (display dialog "Path to the icon png file. (Drag'n Drop is supported)." default answer "" buttons {"Cancel","Continue"} default button 2)
    return dialogText
 EOF
 INPUT=$(osascript -e "$origicon_input");
@@ -140,13 +161,13 @@ UserCancelCheck
 # Populate a unique variable with the data from $INPUT
 ORIGICON="$INPUT"
 
-# Path to where you want the app to be saved
+# Path to where the app will be saved
 APP=$HOME/$PROJECT.app
 
 # No need to change this one
 ICONDIR="$APP/Contents/Resources/$PROJECT.iconset"
 
-# Path to your script file
+##### MARK: SCRIPT - Path to your script file
 read -r -d '' script_input <<'EOF'
    set dialogText to text returned of (display dialog "Path to your script (Drag'n Drop is supported)" default answer "" buttons {"Cancel","Continue"} default button 2)
    return dialogText
@@ -176,10 +197,10 @@ sips -z $SIZE $SIZE $ORIGICON --out $ICONDIR/icon_$(expr $SIZE / 2)x$(expr $SIZE
 done
 
 # Make a multi-resolution Icon
-iconutil --convert icns $ICONDIR -o $APP/Contents/Resources/$PROJECT.icns
+iconutil --convert icns $ICONDIR -o $APP/Contents/Resources/"$PROJECT"Icon.icns
 
 # Delete the iconset, we don't need it anymore
-if [[ -f $HOME/$PROJECT.app/Contents/Resources/$PROJECT.icns ]]; then
+if [[ -f $HOME/$PROJECT.app/Contents/Resources/"$PROJECT"Icon.icns ]]; then
     rm -rf $ICONDIR
 else
    LOG "Failed to create icons"
@@ -195,7 +216,13 @@ fi
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleExecutable</key>
+	<string>${PROJECT}</string>
 	<key>CFBundleIconFile</key>
+	<string>${PROJECT}Icon</string>
+	<key>CFBundleIdentifier</key>
+	<string>${BUNDLEID}</string>
+	<key>CFBundleName</key>
 	<string>${PROJECT}</string>
 	<key>CFBundleShortVersionString</key>
 	<string>${VERSION}</string>
