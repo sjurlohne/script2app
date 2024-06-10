@@ -46,7 +46,17 @@
 ##### From here, the rest is done manually. #####
 #
 # 3. Sign the app using codesign:
-#    'codesign --deep -s "Apple Development: yourdevID@domain.dk (XYZXYZXYZ)" YOURAPP.app'
+#    The file Entitlements.plist should contain the following data:
+#     <?xml version="1.0" encoding="UTF-8"?>
+#     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+#     <plist version="1.0">
+#     <dict>
+# 	      <key>com.apple.security.cs.disable-library-validation</key>
+# 	      <true/>
+#     </dict>
+#     </plist>
+#    
+#    'codesign -o runtime --entitlements /PATH/TO/Entitlements.plist --timestamp --force --verbose=4 -s Developer ID Application: NAME (XYZXYZXYZ) --digest-algorithm=sha1,sha256 /PATH/TO/APP.app'
 #
 # Now that the app is signed, you need to notarize it.
 # For this you'll first create a keychain item for your Apple ID, to be used later in the process.
@@ -58,9 +68,10 @@
 # 2. Run this command, and choose any Profile name you like, and use your App Password.
 #    (To create an App Password, log on to appleid.apple.com)
 #    'xcrun notarytool store-credentials --apple-id "YOUR_APPLE_ID" --password "YOUR_APP_PASSWORD" --team-id "THE_ID_FROM_STEP_1"'
-# 3. You have to zip the app before submitting for notarizzation.
+# 3. You have to zip the app before submitting for notarization.
+#    'ditto -c -k --keepParent /PATH/TO/APP.app /PATH/TO/APP.zip'
 # 4. Now you can notarize the zip file, using this command:
-#    'xcrun notarytool submit YOURAPP.zip --keychain-profile "PROFILE_NAME_FROM_STEP_2" --wait'
+#    'xcrun notarytool submit /PATH/TO/APP.zip --keychain-profile "PROFILE_NAME_FROM_STEP_2" --wait --timeout 1800 -f plist'
 #
 # So, now your app is notarized, the last step is to staple the app.
 #
@@ -254,35 +265,7 @@ touch "$APP"
 
 # Finishing off with some next steps.
 read -r -d '' finish <<'EOF'
-   display dialog "1. Sign the app using codesign:
-codesign --deep -s \"Apple Development: yourdevID@domain.dk (XYZXYZXYZ)\" YOURAPP.app
-
-After the app is signed, you need to notarize it.
-For this you first create a keychain item for your Apple ID, to be used later in the process.
-If you prefer to watch a video guide: https://www.youtube.com/watch?v=2xJcMzoi0EI
-Of course, if you already have the keychain item, you can skip step 1 and 2 below.
-
-1. Run this command, and make a note of the WWDRTeamID, aka Team ID:
-   xcrun altool --list-providers -u \"YOUR_APPLE_ID\"
-2. Run this command, and choose any Profile name you like, and use your App Password:
-   xcrun notarytool store-credentials --apple-id \"YOUR_APPLE_ID\" --password \"YOUR_APP_PASSWORD\" --team-id \"THE_ID_FROM_STEP_1\"
-3. Zip the app before submitting for notarization.
-4. Now you can notarize the zip file, using this command:
-   xcrun notarytool submit YOURAPP.zip --keychain-profile \"PROFILE_NAME_FROM_STEP_2\" --wait
-
-So, now your app is notarized, the last step is to staple the app.
-
-1. Unzip the app again.
-2. The staple process needs to be able to write to the app bundle, so run this:
-   chmod -R 755 YOURAPP.app
-3. To staple the app, simply run this command:
-   xcrun stapler staple -v YOURAPP.app
-
-When the app has been stapled, you can package it for distribution.
-This can be as zip, pkg or dmg.
-If you choose pkg or dmg, you need to sign and notarize the package as well.
-
-" with title "Optional next steps" buttons {"OK"}
+   display dialog "Congratulations!\rYour app is ready to be signed and notarized.\rI recommend using the tool \"SD Notary 2\" for this." with title "Finished" buttons {"OK"}
 EOF
 INPUT=$(osascript -e "$finish");
 
